@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vehicle Speed & Number Plate Detection</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --border-radius: 12px;
+            /* Table ke corners rounded karne ke liye */
+            --transition: 0.3s ease;
+            /* Smooth animation ke liye */
+            --primary-color: #4a90e2;
+            /* Primary color */
+            --text-light: white;
+            /* Light mode text color */
+        }
+
+
+        /* 🌞 Light Mode */
+        body {
+            font-family: 'Poppins', sans-serif;
+            transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+            background: #E3F2FD;
+            /* Light Blue */
+            color: black;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+
+        }
+
+
+
+        .main-content {
+            flex: 1;
+        }
+
+        /* 🌙 Dark Mode */
+        .theme-dark {
+            background: #1A1A2E !important;
+            /* Deep Navy */
+            color: white;
+        }
+
+        /* 🔹 Navbar Styling */
+        .navbar {
+            transition: background 0.3s ease-in-out;
+        }
+
+        .theme-dark .navbar {
+            background: #0D1B2A !important;
+        }
+
+        /* 🔹 Card Styling */
+        .card {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease-in-out;
+        }
+
+        .theme-dark .card {
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0px 8px 32px rgba(255, 255, 255, 0.2);
+        }
+
+        /* 🔹 Button Effects */
+        .btn {
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 🔹 Dark Mode Toggle Button */
+        #darkModeToggle {
+            position: absolute;
+            top: 10px;
+            right: 100px;
+            background: rgba(0, 0, 0, 0.2);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            color: white;
+        }
+
+        #themeToggle:hover {
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .theme-dark #themeToggle {
+            background: rgba(255, 255, 255, 0.2);
+            color: black;
+        }
+
+        /* 🔥 Smooth Fade-in Animation */
+        @keyframes fadeIn {
+            from {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0px 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            transform: scale(0.9);
+            opacity: 0;
+            animation: fadeIn 0.5s forwards;
+        }
+
+        .theme-dark .container {
+            background: rgba(0, 0, 0, 0.6);
+            box-shadow: 0px 8px 32px rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-footer {
+            background: #0d47a1;
+            /* Deep Blue - Compliments Your Theme */
+            color: white;
+            text-align: center;
+            padding: 12px;
+            font-size: 11px;
+            font-weight: 400;
+            box-shadow: 0px -3px 8px rgba(0, 0, 0, 0.2);
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            flex-wrap: wrap;
+        }
+
+        .container:hover {
+            box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.5);
+            transform: scale(1);
+        }
+
+        .form-control {
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            color: black;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .form-control:focus {
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 213, 255, 0.5);
+        }
+
+        .form-control::placeholder {
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        .theme-dark .form-control {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .theme-dark .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+
+
+        .custom-footer h4 {
+            font-size: 14px;
+            margin: 0;
+            padding: 8px;
+            letter-spacing: 0.8px;
+            line-height: 1.5;
+        }
+
+        /* 🔥 Name Hover Effect */
+        .custom-footer .highlight {
+            font-weight: 600;
+            color: white;
+            /* Default White */
+            transition: all 0.3s ease-in-out;
+        }
+
+        .custom-footer .highlight:hover {
+            color: #ffcc00;
+            /* Golden Yellow on Hover */
+            transform: scale(1.1);
+        }
+
+        /* 🌙 Dark Mode Footer */
+        .theme-dark .custom-footer {
+            background: #111927;
+            /* Dark Navy - Compliments Dark Mode */
+            box-shadow: 0px -3px 8px rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-btn.active {
+            font-weight: bold;
+        }
+
+
+        .theme-dark .table tbody tr:hover {
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        .table {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .theme-dark .table {
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Table Header */
+        .table thead {
+            background: linear-gradient(135deg, var(--primary-color), #5a67d8);
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .theme-dark .table thead {
+            background: linear-gradient(135deg, #4a4e69, #22223b);
+        }
+
+        /* Table Rows */
+        .table tbody tr {
+            transition: var(--transition);
+        }
+
+        /* Hover Effect on Rows */
+        .table tbody tr:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .theme-dark .table tbody tr:hover {
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Table Cell Padding */
+        .table td,
+        .table th {
+            padding: 12px 16px;
+            text-align: center;
+        }
+
+        /* Speed Violations - Highlight Rows */
+        .violations-row {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        .theme-dark .violations-row {
+            background-color: rgba(220, 53, 69, 0.3);
+        }
+
+        /* Ensure image responsiveness */
+        .snapshot-img {
+            max-width: 100px;
+            /* Thumbnail size */
+            border-radius: 8px;
+            /* Smooth corners */
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            cursor: pointer;
+            /* Pointer on hover */
+        }
+
+        /* Zoom effect on hover */
+        .snapshot-img:hover {
+            transform: scale(2);
+            /* Enlarges image */
+            z-index: 999;
+            /* Ensure it appears above other content */
+            position: relative;
+            /* Keep image above */
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+            /* 3D shadow effect */
+        }
+
+
+
+        /* Show Sidebar on Active */
+        .sidebar.active {
+            left: 0;
+            /* Slide In */
+        }
+
+        /* Sidebar Links */
+        .sidebar a {
+            display: block;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background: #495057;
+            /* Hover Effect */
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            /* Hide Sidebar Initially */
+            width: 250px;
+            height: 100vh;
+            background: #212529;
+            /* Dark Background */
+            color: white;
+            /* Text Color */
+            padding-top: 60px;
+            transition: left 0.4s ease;
+            /* Smooth Slide */
+            z-index: 1050;
+            /* Ensure Sidebar is Above */
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+            /* Sidebar Shadow */
+        }
+
+        /* Sidebar Toggle Button (No Background + Rotate on Hover) */
+        #sidebarToggle {
+            position: fixed;
+            /* Fixed to the screen */
+            top: 20px;
+            /* Distance from the top */
+            left: 20px;
+            /* Stick to the left side */
+            z-index: 1100;
+            /* Above sidebar and content */
+            background: transparent;
+            /* No background */
+            color: white;
+            /* Icon color */
+            border: none;
+            /* Remove border */
+            padding: 8px;
+            /* Compact padding */
+            font-size: 24px;
+            /* Icon size */
+            cursor: pointer;
+            /* Pointer cursor on hover */
+            transition: transform 0.3s ease;
+            /* Smooth rotation effect */
+        }
+
+        .sidebar-open #sidebarToggle {
+            transform: rotate(180deg);
+            /* Rotate 180 degrees */
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar Toggle Button -->
+    <button id="sidebarToggle" class="btn btn-dark">☰</button>
+
+    <!-- Sliding Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <a href="#" id="darkModeToggle">🌙 Dark Mode</a>
+        <a href="{{ url_for('logout') }}">🚪 Logout</a>
+    </div>
+
+
+    <!-- 🚗 Vehicles Table -->
+    <div class="container mt-5 p-9 shadow-lg rounded">
+        <h2 class="text-center text-primary">Vehicle Speed & Number Plate Detection</h2>
+
+        <!-- File Upload -->
+        <div class="mb-3">
+            <label class="form-label">Upload Video</label>
+            <input type="file" class="form-control" id="videoUpload" accept="video/*">
+        </div>
+
+        <!-- Speed Limit Input -->
+        <div class="mb-3">
+            <label class="form-label">Set Speed Limit (km/h)</label>
+            <input type="number" class="form-control" id="speedLimit" value="80">
+        </div>
+
+        <!-- Real World Distance Input -->
+        <div class="mb-3">
+            <label class="form-label">Set Real-World Distance (meters)</label>
+            <input type="number" class="form-control" id="realWorldDistance" value="10">
+        </div>
+
+        <!-- Process Button -->
+        <button class="btn btn-primary w-100 mb-3" onclick="processVideo()">Start Processing</button>
+
+        <!-- Tab Switch Buttons -->
+        <div class="d-flex">
+            <button class="btn btn-outline-primary tab-btn active" id="vehiclesTab"
+                onclick="toggleTable('vehiclesTableDiv')">Vehicles</button>
+            
+            <button class="btn btn-outline-danger tab-btn" id="violationsTab"
+                onclick="toggleTable('violationsTableDiv')">Violations</button>
+        </div>
+
+        <!-- 🚗 Vehicles Table -->
+        <div id="vehiclesTableDiv" class="mt-4">
+            <h3 class="text-primary">🚗 Vehicle Data</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Number Plate</th>
+                        <th>Speed (km/h)</th>
+                        <th>Location</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody id="vehiclesTable">
+                    <tr>
+                        <td colspan="5" class="text-center">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 🚦 Violations Table -->
+        <div id="violationsTableDiv" class="mt-4 d-none">
+            <h3 class="text-danger">🚦 Speed Violations</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Number Plate</th>
+                        <th>Speed (km/h)</th>
+                        <th>Speed Limit</th>
+                        <th>Location</th>
+                        <th>Timestamp</th>
+                        <th>Snapshot</th>
+                    </tr>
+                </thead>
+                <tbody id="violationsTable">
+                    <tr>
+                        <td colspan="7" class="text-center">Loading...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("darkModeToggle").addEventListener("click", function () {
+            document.body.classList.toggle("theme-dark");
+            this.innerHTML = document.body.classList.contains("theme-dark") ? "☀️ Light Mode" : "🌙 Dark Mode";
+            localStorage.setItem("theme", document.body.classList.contains("theme-dark") ? "dark" : "light");
+        });
+
+
+
+        function processVideo() {
+            const videoFile = document.getElementById("videoUpload").files[0];
+            const speedLimit = document.getElementById("speedLimit").value;
+            const realWorldDistance = document.getElementById("realWorldDistance").value;
+
+            if (!videoFile) {
+                alert("Please upload a video first!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("video", videoFile);
+            formData.append("speed_limit", speedLimit);
+            formData.append("real_world_distance", realWorldDistance);
+
+            fetch("/process", {
+                method: "POST",
+                body: formData
+            }).then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    fetchVehicles();
+                    fetchViolations();
+                }).catch(error => console.error("Error:", error));
+        }
+
+        function fetchVehicles() {
+            fetch("/get_vehicles")
+                .then(response => response.json())
+                .then(data => {
+                    const vehiclesTable = document.getElementById("vehiclesTable");
+                    vehiclesTable.innerHTML = data.length ? "" : "<tr><td colspan='5' class='text-center'>No vehicle data available.</td></tr>";
+                    data.forEach((vehicle, index) => {
+                        vehiclesTable.innerHTML += `<tr>
+                            <td>${index + 1}</td>
+                            <td>${vehicle.number_plate}</td>
+                            <td>${vehicle.speed_kph} km/h</td>
+                            <td>${vehicle.location}</td>
+                            <td>${vehicle.timestamp}</td>
+                        </tr>`;
+                    });
+                })
+                .catch(error => console.error("Error fetching vehicles:", error));
+        }
+
+        function fetchViolations() {
+            fetch("/get_violations")
+                .then(response => response.json())
+                .then(data => {
+                    const violationsTable = document.getElementById("violationsTable");
+                    violationsTable.innerHTML = data.length ? "" : "<tr><td colspan='7' class='text-center'>No violations recorded yet.</td></tr>";
+                    data.forEach((violation, index) => {
+                        violationsTable.innerHTML += `<tr>
+                            <td>${index + 1}</td>
+                            <td>${violation.number_plate}</td>
+                            <td>${violation.speed_kph} km/h</td>
+                            <td>${violation.speed_limit} km/h</td>
+                            <td>${violation.location}</td>
+                            <td>${violation.timestamp}</td>
+                            <td><img src="${violation.snapshot}" alt="Snapshot" class="snapshot-img img-fluid"></td>
+                        </tr>`;
+                    });
+                })
+                .catch(error => console.error("Error fetching violations:", error));
+        }
+
+        function toggleTable(tableId) {
+            const vehiclesTable = document.getElementById('vehiclesTableDiv');
+            const violationsTable = document.getElementById('violationsTableDiv');
+            const vehiclesTab = document.getElementById('vehiclesTab');
+            const violationsTab = document.getElementById('violationsTab');
+
+            if (tableId === 'vehiclesTableDiv') {
+                vehiclesTable.classList.remove('d-none');
+                violationsTable.classList.add('d-none');
+                vehiclesTab.classList.add('active');
+                violationsTab.classList.remove('active');
+            } else {
+                violationsTable.classList.remove('d-none');
+                vehiclesTable.classList.add('d-none');
+                violationsTab.classList.add('active');
+                vehiclesTab.classList.remove('active');
+            }
+        }
+
+        setInterval(() => {
+            fetchVehicles();
+            fetchViolations();
+        }, 5000);
+
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+                document.body.classList.add("theme-dark");
+                document.getElementById("darkModeToggle").innerHTML = "☀️ Light Mode";
+            }
+        });
+
+        function toggleTable(tableId) {
+            document.getElementById("vehiclesTableDiv").classList.add("d-none");
+            document.getElementById("violationsTableDiv").classList.add("d-none");
+            document.getElementById(tableId).classList.remove("d-none");
+
+            // Update active tab
+            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+            const activeButton = tableId === 'vehiclesTableDiv' ? 'vehiclesTab' : 'violationsTab';
+            document.getElementById(activeButton).classList.add("active");
+        }
+
+
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const toggleBtn = document.getElementById('sidebarToggle');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('active'); // Toggle 'active' class
+        });
+    </script>
+
+    <footer class="custom-footer">
+        <h4>
+            This project is developed by
+            <span class="highlight">Krishnal Deshmukh</span>,
+            <span class="highlight">Ishwari Idalgave</span>,
+            <span class="highlight">Gloria Madhri</span> &
+            <span class="highlight">Lian Dabre</span>. <br>
+            Any sort of copyright infringement will not be entertained.
+        </h4>
+    </footer>
+</body>
+
+</html>
